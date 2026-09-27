@@ -1,0 +1,25 @@
+{
+  "name": "qvac-thank-you-note-writer",
+  "version": "1.0.0",
+  "description": "Enter what you're thankful for and who it's to, and an on-device AI writes a short genuine thank-you note referencing the actual specific thing mentioned. No cloud call, no API key.",
+  "type": "module",
+  "main": "src/gui.js",
+  "scripts": {
+    "start": "node src/gui.js",
+    "gui": "node src/gui.js"
+  },
+  "keywords": [
+    "qvac",
+    "on-device-ai",
+    "gratitude",
+    "llm",
+    "offline-ai"
+  ],
+  "license": "MIT",
+  "dependencies": {
+    "@qvac/sdk": "^0.19.0"
+  },
+  "engines": {
+    "node": ">=22.17"
+  }
+}

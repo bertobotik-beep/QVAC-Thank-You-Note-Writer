@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>QVAC Thank You Note Writer</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    min-height: 100vh;
+    background: linear-gradient(160deg, #fef9f0 0%, #fbeecb 100%);
+    font-family: system-ui, -apple-system, sans-serif;
+    color: #5a4522;
+    display: flex;
+    justify-content: center;
+    padding: 46px 20px;
+  }
+  .wrap { width: 100%; max-width: 520px; text-align: center; }
+  .icon { font-size: 2rem; margin-bottom: 4px; }
+  h1 { font-size: 1.6rem; margin: 0 0 6px; color: #b8860b; font-weight: 800; }
+  .subtitle { color: #96813f; margin-bottom: 24px; font-size: 0.9rem; }
+  .card {
+    background: #fffdf5;
+    border: 2px solid #ecd68f;
+    border-radius: 20px;
+    padding: 30px 26px;
+  }
+  input[type=text] {
+    width: 100%;
+    padding: 12px 14px;
+    border-radius: 12px;
+    border: 2px solid #ecd68f;
+    background: #fff;
+    color: #5a4522;
+    font-family: inherit;
+    font-size: 1rem;
+    margin-bottom: 14px;
+    text-align: center;
+  }
+  button.action {
+    padding: 12px 28px;
+    border: none;
+    border-radius: 999px;
+    font-size: 1rem;
+    font-weight: 700;
+    font-family: inherit;
+    cursor: pointer;
+    background: #b8860b;
+    color: #fff;
+    box-shadow: 0 5px 0 #8a6408;
+    margin-top: 4px;
+  }
+  button.action:active { transform: translateY(3px); box-shadow: 0 2px 0 #8a6408; }
+  button.action:disabled { opacity: 0.4; cursor: not-allowed; }
+  .status { margin-top: 14px; font-size: 0.85rem; color: #96813f; min-height: 1.2em; }
+  .result-body {
+    font-size: 1.02rem;
+    line-height: 1.7;
+    margin: 20px 0 4px;
+    color: #5a4522;
+    text-align: left;
+    background: #fbeecb;
+    border-radius: 12px;
+    padding: 16px 18px;
+    white-space: pre-line;
+  }
+  .footer-note { color: #96813f; font-size: 0.78rem; margin-top: 20px; }
+  .spinner {
+    display: inline-block;
+    width: 13px; height: 13px;
+    border: 2px solid #ecd68f;
+    border-top-color: #b8860b;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    vertical-align: middle;
+    margin-right: 8px;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="icon">💌</div>
+    <h1>Thank You Note Writer</h1>
+    <p class="subtitle">Enter what you're thankful for and who it's to, get a genuine note. 100% on-device.</p>
+
+    <div class="card">
+      <input type="text" id="thingInput" placeholder="What you're thankful for, e.g. driving me to the airport at 5am" />
+      <input type="text" id="recipientInput" placeholder="Who it's to, e.g. my roommate Jordan" />
+      <button class="action" id="generateBtn">Write My Note</button>
+      <div class="status" id="status"></div>
+      <div id="resultBox"></div>
+    </div>
+
+    <p class="footer-note">Everything runs locally on your machine. No text ever leaves this device.</p>
+  </div>
+
+  <script>
+    function escapeHtml(str) {
+      const div = document.createElement('div');
+      div.textContent = str;
+      return div.innerHTML;
+    }
+
+    const thingInput = document.getElementById('thingInput');
+    const recipientInput = document.getElementById('recipientInput');
+    const generateBtn = document.getElementById('generateBtn');
+    const status = document.getElementById('status');
+    const resultBox = document.getElementById('resultBox');
+
+    async function generate() {
+      const thing = thingInput.value.trim();
+      const recipient = recipientInput.value.trim();
+      if (!thing || !recipient) return;
+      generateBtn.disabled = true;
+      resultBox.innerHTML = '';
+      status.innerHTML = '<span class="spinner"></span>Writing your note...';
+
+      try {
+        const res = await fetch('/api/thankYou', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ thing, recipient }),
+        });
+        const data = await res.json();
+        if (data.error) throw new Error(data.error);
+
+        status.textContent = '';
+        resultBox.innerHTML = `<div class="result-body">${escapeHtml(data.note)}</div>`;
+      } catch (err) {
+        status.textContent = 'Error: ' + err.message;
+      } finally {
+        generateBtn.disabled = false;
+      }
+    }
+
+    generateBtn.addEventListener('click', generate);
+    recipientInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') generate(); });
+    thingInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') generate(); });
+  </script>
+</body>
+</html>
