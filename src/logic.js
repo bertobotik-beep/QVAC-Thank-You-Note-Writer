@@ -32,11 +32,14 @@ function isGrounded(text, thing) {
 }
 
 function stripInventedSignature(text) {
-  // Remove a trailing signature line like "- Sarah" or "Sincerely,\nAlex"
-  // since we were never given the sender's name and don't want one invented.
+  // Remove a trailing signature line like "- Sarah", "- Sarah Jones", or
+  // "Sincerely,\nAlex" since we were never given the sender's name and don't
+  // want one invented. The name portion allows multiple capitalized words
+  // (e.g. a full first + last name), not just a single word.
+  const namePattern = "[A-Z][a-zA-Z'-]*(?:\\s+[A-Z][a-zA-Z'-]*)*";
   return text
-    .replace(/\n+\s*(sincerely|warmly|best|regards|love|thanks again)[,.]?\s*\n+\s*[A-Z][a-zA-Z]*\s*$/i, "")
-    .replace(/\n+\s*[-—]\s*[A-Z][a-zA-Z]*\s*$/, "")
+    .replace(new RegExp(`\\n+\\s*(sincerely|warmly|best|regards|love|thanks again)[,.]?\\s*\\n+\\s*${namePattern}\\s*$`, "i"), "")
+    .replace(new RegExp(`\\n+\\s*[-—]\\s*${namePattern}\\s*$`), "")
     .trim();
 }
 
